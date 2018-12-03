@@ -24,11 +24,11 @@ module HttpHandlers =
 
     [<CLIMutable>]
     type UserAndRequestId = {
-        UserId: int
+        UserId: UserId
         RequestId: Guid
     }
 
-    let requestTimeOff (handleCommand: Command -> Result<RequestEvent list, string>) (identity: ServerTypes.Identity) =
+    let requestTimeOff (handleCommand: Command -> Result<RequestEvent list, string>) =
         fun (next: HttpFunc) (ctx: HttpContext) ->
             task {
                 let! timeOffRequest = ctx.BindJsonAsync<TimeOffRequest>()
@@ -40,7 +40,7 @@ module HttpHandlers =
                     return! (BAD_REQUEST message) next ctx
             }
 
-    let validateRequest (handleCommand: Command -> Result<RequestEvent list, string>) (identity: ServerTypes.Identity) =
+    let validateRequest (handleCommand: Command -> Result<RequestEvent list, string>) =
         fun (next: HttpFunc) (ctx: HttpContext) ->
             task {
                 let userAndRequestId = ctx.BindQueryString<UserAndRequestId>()
@@ -58,14 +58,14 @@ module HttpHandlers =
 // ---------------------------------
 
 let webApp (eventStore: IStore<UserId, RequestEvent>) =
-    let handleCommand (command: Command) =
+    let handleCommand (user: User) (command: Command) =
         let userId = command.UserId
 
         let eventStream = eventStore.GetStream(userId)
         let state = eventStream.ReadAll() |> Seq.fold Logic.evolveUserRequests Map.empty
 
         // Decide how to handle the command
-        let result = Logic.decide state command
+        let result = Logic.decide state user command
 
         // Save events in case of success
         match result with
@@ -78,12 +78,12 @@ let webApp (eventStore: IStore<UserId, RequestEvent>) =
     choose [
         subRoute "/api"
             (choose [
-                route "/users/login" >=> POST >=> Auth.login
+                route "/users/login" >=> POST >=> Auth.Handlers.login
                 subRoute "/timeoff"
-                    (Auth.requiresJwtTokenForAPI (fun identity ->
+                    (Auth.Handlers.requiresJwtTokenForAPI (fun user ->
                         choose [
-                            POST >=> route "/request" >=> HttpHandlers.requestTimeOff handleCommand identity
-                            POST >=> route "/validate-request" >=> HttpHandlers.validateRequest handleCommand identity
+                            POST >=> route "/request" >=> HttpHandlers.requestTimeOff (handleCommand user)
+                            POST >=> route "/validate-request" >=> HttpHandlers.validateRequest (handleCommand user)
                         ]
                     ))
             ])
