@@ -303,7 +303,7 @@ paket-files/
 .storage/
 
 # JetBrains Rider
-.idea/
+#.idea/
 *.sln.iml
 
 # CodeRush personal settings
@@ -351,11 +351,8 @@ ASALocalRun/
 *.DotSettings
 
 ### fsharp ###
-lib/debug
-lib/release
-Debug
-obj
-bin
+lib/debug/
+lib/release/
 /build/
 *.exe
 !.paket/paket.bootstrapper.exe
