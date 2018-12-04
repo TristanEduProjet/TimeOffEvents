@@ -26,15 +26,14 @@ type RequestEvent =
         | RequestValidated request -> request
         | RequestCancelled request -> request
 
-// We then define the state of the system,
-// and our 2 main functions `decide` and `evolve`
+// We then define the state of the system, and our 2 main functions `decide` and `evolve`
 module Logic =
 
     type RequestState =
         | NotCreated
         | PendingValidation of TimeOffRequest
         | Validated of TimeOffRequest
-        | UnknownState of TimeOffRequest //default //TODO: à supprimer une fois tout implementer
+        | UnknownState of TimeOffRequest //default, TODO: à supprimer une fois tout implementer
         with
         member this.Request =
             match this with
@@ -51,16 +50,13 @@ module Logic =
 
     type UserRequestsState = Map<Guid, RequestState>
 
-    let evolveRequest state event =
-        match event with
-        | RequestCreated request -> PendingValidation request
-        | RequestValidated request -> Validated request
-        | _ -> UnknownState event.Request
-        //TODO: requestCancelled ...
-
     let evolveUserRequests (userRequests: UserRequestsState) (event: RequestEvent) =
         let requestState = defaultArg (Map.tryFind event.Request.RequestId userRequests) NotCreated
-        let newRequestState = evolveRequest requestState event
+        let newRequestState = match event with
+                              | RequestCreated request -> PendingValidation request
+                              | RequestValidated request -> Validated request
+                              | _ -> UnknownState event.Request
+                              //TODO: requestCancelled ...
         userRequests.Add (event.Request.RequestId, newRequestState)
 
     let overlapsWith request1 request2 =
@@ -72,7 +68,6 @@ module Logic =
     let createRequest today activeUserRequests request =
         if request |> overlapsWithAnyRequest activeUserRequests then
             Error "Overlapping request"
-        // This DateTime.Today must go away!
         elif request.Start.Date <= today then
             Error "The request starts in the past"
         else
@@ -90,31 +85,24 @@ module Logic =
         | _ -> Error "Request cannot be cancelled"
 
     let decide (today: DateTime) (userRequests: UserRequestsState) (user: User) (command: Command) =
-        let relatedUserId = command.UserId
         match user with
-        | Employee userId when userId <> relatedUserId -> Error "Unauthorized"
-        | _ ->
-            match command with
-            | RequestTimeOff request ->
-                let activeUserRequests =
-                    userRequests
-                    |> Map.toSeq
-                    |> Seq.map (fun (_, state) -> state)
-                    |> Seq.where (fun state -> state.IsActive)
-                    |> Seq.map (fun state -> state.Request)
-
-                createRequest today activeUserRequests request
-
-            | ValidateRequest (_, requestId) ->
-                if user <> Manager then
-                    Error "Unauthorized"
-                else
-                    let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
-                    validateRequest requestState
-
-            | CancelRequest (_, requestId) ->
-                if user = Manager then
-                    Error "Unauthorized"
-                else
-                    let requestState = defaultArg (userRequests.TryFind requestId) NotCreated
-                    cancelRequest requestState
+        | Employee userId when userId <> command.UserId -> Error "Unauthorized" //check employee act on his own datas
+        | _ -> match command with
+                | RequestTimeOff request ->
+                    let activeUserRequests = userRequests |> Map.toSeq
+                                                          |> Seq.map (fun (_, state) -> state)
+                                                          |> Seq.where (fun state -> state.IsActive)
+                                                          |> Seq.map (fun state -> state.Request)
+                    createRequest today activeUserRequests request
+    
+                | ValidateRequest (_, requestId) ->
+                    if user <> Manager then
+                        Error "Unauthorized"
+                    else
+                        validateRequest (defaultArg (userRequests.TryFind requestId) NotCreated)
+    
+                | CancelRequest (_, requestId) ->
+                    if user = Manager then
+                        Error "Unauthorized"
+                    else
+                        cancelRequest (defaultArg (userRequests.TryFind requestId) NotCreated)
