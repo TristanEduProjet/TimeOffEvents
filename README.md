@@ -13,7 +13,7 @@ To get started, just dotnet run in the folder to run the Expecto tests.
 dotnet restore
 ```
 ## For install web dependencies
-You need *yarn* installed.
+You need *yarn* and *npx* installed.
 ```bash
 yarn install
 ```
@@ -29,3 +29,12 @@ dotnet run
 cd src/app/Server
 dotnet run
 ```
+
+## For launch HTTP client
+```bash
+cd src/app/Client
+npx webpack-dev-server
+```
+
+## For devs
+you can also use `dotnet watch run` instead of `dotnet run` for automatically re-run when code is modified.
