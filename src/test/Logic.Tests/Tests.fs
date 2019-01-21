@@ -63,7 +63,7 @@ let overlapTests =
   testList "Overlap tests" [
     test "A request overlaps with itself" {
       let request = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 1); HalfDay = PM }
@@ -74,14 +74,14 @@ let overlapTests =
 
     test "A request overlaps with another" {
       let request1 = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
       }
 
       let request2 = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 2); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 3); HalfDay = PM }
@@ -93,14 +93,14 @@ let overlapTests =
 
     test "A request overlaps partialy with another" {
       let request1 = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 3); HalfDay = AM }
       }
 
       let request2 = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 2); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
@@ -112,14 +112,14 @@ let overlapTests =
 
     test "Requests on 2 distinct days don't overlap" {
       let request1 = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 1); HalfDay = PM }
       }
 
       let request2 = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 2); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 2); HalfDay = PM }
@@ -131,14 +131,14 @@ let overlapTests =
 
     test "Requests on same day without overlap" {
       let request1 = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 1); HalfDay = AM }
       }
 
       let request2 = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 1); HalfDay = PM }
         End = { Date = DateTime(2018, 10, 1); HalfDay = PM }
@@ -150,14 +150,14 @@ let overlapTests =
 
     test "Requests on same day without overlap (extend test)" {
       let request1 = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 2); HalfDay = AM }
       }
 
       let request2 = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 2); HalfDay = PM }
         End = { Date = DateTime(2018, 10, 3); HalfDay = PM }
@@ -173,20 +173,20 @@ let overlapSeqTests =
     test "Request overlaps when superpose _1" {
       let requests: TimeOffRequest seq = seq[
         {
-          UserId = 1
+          UserId = "jdoe"
           RequestId = Guid.NewGuid()
           Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
           End = { Date = DateTime(2018, 10, 2); HalfDay = PM }
         };
         {
-          UserId = 1
+          UserId = "jdoe"
           RequestId = Guid.NewGuid()
           Start = { Date = DateTime(2018, 10, 3); HalfDay = AM }
           End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
         }
       ]
       let request: TimeOffRequest = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 4); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 5); HalfDay = PM }
@@ -198,20 +198,20 @@ let overlapSeqTests =
     test "Request overlaps when superpose _2" {
       let requests: TimeOffRequest seq = seq[
         {
-          UserId = 1
+          UserId = "jdoe"
           RequestId = Guid.NewGuid()
           Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
           End = { Date = DateTime(2018, 10, 2); HalfDay = PM }
         };
         {
-          UserId = 1
+          UserId = "jdoe"
           RequestId = Guid.NewGuid()
           Start = { Date = DateTime(2018, 10, 3); HalfDay = AM }
           End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
         }
       ]
       let request: TimeOffRequest = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 9, 30); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 5); HalfDay = PM }
@@ -223,20 +223,20 @@ let overlapSeqTests =
     test "Request overlaps when superpose _3" {
       let requests: TimeOffRequest seq = seq[
         {
-          UserId = 1
+          UserId = "jdoe"
           RequestId = Guid.NewGuid()
           Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
           End = { Date = DateTime(2018, 10, 2); HalfDay = PM }
         };
         {
-          UserId = 1
+          UserId = "jdoe"
           RequestId = Guid.NewGuid()
           Start = { Date = DateTime(2018, 10, 3); HalfDay = AM }
           End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
         }
       ]
       let request: TimeOffRequest = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 9, 30); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 1); HalfDay = AM }
@@ -248,26 +248,26 @@ let overlapSeqTests =
     test "Request don't overlaps" {
       let requests: TimeOffRequest seq = seq[
         {
-          UserId = 1
+          UserId = "jdoe"
           RequestId = Guid.NewGuid()
           Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
           End = { Date = DateTime(2018, 10, 2); HalfDay = PM }
         };
         {
-          UserId = 1
+          UserId = "jdoe"
           RequestId = Guid.NewGuid()
           Start = { Date = DateTime(2018, 10, 3); HalfDay = AM }
           End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
         }
       ]
       let request1: TimeOffRequest = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 5); HalfDay = AM }
         End = { Date = DateTime(2018, 10, 5); HalfDay = PM }
       }
       let request2: TimeOffRequest = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 9, 30); HalfDay = AM }
         End = { Date = DateTime(2018, 9, 30); HalfDay = PM }
@@ -280,20 +280,20 @@ let overlapSeqTests =
     test "Request don't overlaps between" {
       let requests: TimeOffRequest seq = seq[
         {
-          UserId = 1
+          UserId = "jdoe"
           RequestId = Guid.NewGuid()
           Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
           End = { Date = DateTime(2018, 10, 2); HalfDay = AM }
         };
         {
-          UserId = 1
+          UserId = "jdoe"
           RequestId = Guid.NewGuid()
           Start = { Date = DateTime(2018, 10, 3); HalfDay = AM }
           End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
         }
       ]
       let request: TimeOffRequest = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 10, 2); HalfDay = PM }
         End = { Date = DateTime(2018, 10, 2); HalfDay = PM }
@@ -308,26 +308,26 @@ let creationTests =
   testList "Creation tests" [
     test "A request is created" {
       let request = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 12, 28); HalfDay = AM }
         End = { Date = DateTime(2018, 12, 28); HalfDay = PM } }
 
       Given [ ]
-      |> ConnectedAs (Employee 1)
+      |> ConnectedAs (Employee "jdoe")
       |> AndDateIs (2018, 12, 3)
       |> When (RequestTimeOff request)
       |> Then (Ok [RequestCreated request]) "The request should have been created"
     }
     test "A request in the past cannot be created" {
       let request = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 11, 28); HalfDay = AM }
         End = { Date = DateTime(2018, 11, 28); HalfDay = PM } }
 
       Given [ ]
-      |> ConnectedAs (Employee 1)
+      |> ConnectedAs (Employee "jdoe")
       |> AndDateIs (2018, 12, 3)
       |> When (RequestTimeOff request)
       |> Then (Error "The request starts in the past") "The request should not have been created"
@@ -341,7 +341,7 @@ let validationTests =
   testList "Validation tests" [
     test "A request is validated" {
       let request = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 12, 28); HalfDay = AM }
         End = { Date = DateTime(2018, 12, 28); HalfDay = PM } }
@@ -349,7 +349,7 @@ let validationTests =
       Given [ RequestCreated request ]
       |> ConnectedAs Manager
       |> AndDateIs (2018, 12, 3)
-      |> When (ValidateRequest (1, request.RequestId))
+      |> When (ValidateRequest ("jdoe", request.RequestId))
       |> Then (Ok [RequestValidated request]) "The request should have been validated"
     }
   ]
@@ -359,28 +359,28 @@ let cancellationTests =
   testList "Cancellation tests" [
     test "A request is cancelled" {
       let request = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 12, 28); HalfDay = AM }
         End = { Date = DateTime(2018, 12, 28); HalfDay = PM } }
 
       Given [ RequestCreated request ]
-      |> ConnectedAs (Employee 1)
+      |> ConnectedAs (Employee "jdoe")
       |> AndDateIs (2018, 12, 3)
-      |> When (CancelRequest (1, request.RequestId))
+      |> When (CancelRequest ("jdoe", request.RequestId))
       |> Then (Ok [RequestCancelled request]) "The request should have been cancelled"
     }
     test "A validated request is cancelled" {
       let request = {
-        UserId = 1
+        UserId = "jdoe"
         RequestId = Guid.NewGuid()
         Start = { Date = DateTime(2018, 12, 28); HalfDay = AM }
         End = { Date = DateTime(2018, 12, 28); HalfDay = PM } }
 
       Given [ RequestCreated request; RequestValidated request ]
-      |> ConnectedAs (Employee 1)
+      |> ConnectedAs (Employee "jdoe")
       |> AndDateIs (2018, 12, 3)
-      |> When (CancelRequest (1, request.RequestId))
+      |> When (CancelRequest ("jdoe", request.RequestId))
       |> Then (Ok [RequestCancelled request]) "The request should have been cancelled"
     }
   ]

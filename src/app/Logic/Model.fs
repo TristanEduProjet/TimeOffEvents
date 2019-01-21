@@ -8,7 +8,7 @@ type Command =
     | ValidateRequest of UserId * Guid
     | CancelRequest of UserId * Guid
     with
-    member this.UserId =
+    member this.UserId : UserId =
         match this with
         | RequestTimeOff request -> request.UserId
         | ValidateRequest (userId, _) -> userId
@@ -20,7 +20,7 @@ type RequestEvent =
     | RequestValidated of TimeOffRequest
     | RequestCancelled of TimeOffRequest
     with
-    member this.Request =
+    member this.Request : TimeOffRequest =
         match this with
         | RequestCreated request -> request
         | RequestValidated request -> request
@@ -60,22 +60,19 @@ module Logic =
         userRequests.Add (event.Request.RequestId, newRequestState)
 
     let rec overlapsWith (request1:TimeOffRequest) (request2:TimeOffRequest) = //requests mustbe valide (.start <= .end)
-        //if request1 > request2 then overlapsWith request2 request1
-        if (request1.End <= request2.Start && request1.End <= request2.End && request1.End.HalfDay <> request2.Start.HalfDay) then false
-        elif (request2.End <= request1.Start && request2.End <= request1.End && request1.End.HalfDay <> request2.Start.HalfDay) then false
-        else true
+        not( (request1.End.HalfDay <> request2.Start.HalfDay) && (
+                (request1.End <= request2.Start && request1.End <= request2.End) ||
+                (request2.End <= request1.Start && request2.End <= request1.End)
+        ))
 
     let overlapsWithAnyRequest (otherRequests: TimeOffRequest seq) request =
         //Seq.sortBy (req -> req.Start) otherRequests |> Seq.pairwise |>
         Seq.exists (overlapsWith request) otherRequests
 
     let createRequest today activeUserRequests request =
-        if request |> overlapsWithAnyRequest activeUserRequests then
-            Error "Overlapping request"
-        elif request.Start.Date <= today then
-            Error "The request starts in the past"
-        else
-            Ok [RequestCreated request]
+        if request |> overlapsWithAnyRequest activeUserRequests then Error "Overlapping request"
+        elif request.Start.Date <= today then Error "The request starts in the past"
+        else Ok [RequestCreated request]
 
     let validateRequest requestState =
         match requestState with
@@ -100,13 +97,9 @@ module Logic =
                     createRequest today activeUserRequests request
     
                 | ValidateRequest (_, requestId) ->
-                    if user <> Manager then
-                        Error "Unauthorized"
-                    else
-                        validateRequest (defaultArg (userRequests.TryFind requestId) NotCreated)
+                    if user <> Manager then Error "Unauthorized"
+                    else validateRequest (defaultArg (userRequests.TryFind requestId) NotCreated)
     
                 | CancelRequest (_, requestId) ->
-                    if user = Manager then
-                        Error "Unauthorized"
-                    else
-                        cancelRequest (defaultArg (userRequests.TryFind requestId) NotCreated)
+                    if user = Manager then Error "Unauthorized"
+                    else cancelRequest (defaultArg (userRequests.TryFind requestId) NotCreated)

@@ -1,7 +1,7 @@
 module ServerCode.App
 
 open TimeOff
-open EventStorage
+open Storage.Events
 
 open System
 open System.IO
@@ -11,8 +11,10 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
+open Giraffe.Serialization.Json
 open Giraffe.HttpStatusCodeHandlers.RequestErrors
 open FSharp.Control.Tasks
+open Thoth.Json.Giraffe
 
 // ---------------------------------
 // Handlers
@@ -48,8 +50,21 @@ module HttpHandlers =
                 match result with
                 | Ok [RequestValidated timeOffRequest] -> return! json timeOffRequest next ctx
                 | Ok _ -> return! Successful.NO_CONTENT next ctx
-                | Error message ->
-                    return! (BAD_REQUEST message) next ctx
+                | Error message -> return! (BAD_REQUEST message) next ctx
+            }
+
+    let getUserBalance (authentifiedUser: User) (userName: string) =
+        fun (next: HttpFunc) (ctx: HttpContext) ->
+            task {
+                let balance : UserVacationBalance = {
+                  UserName = userName
+                  BalanceYear = 2018
+                  CarriedOver = 0.0
+                  PortionAccruedToDate = 10.0
+                  TakenToDate = 0.0
+                  CurrentBalance = 10.
+                }
+                return! json balance next ctx
             }
 
 // ---------------------------------
@@ -58,9 +73,7 @@ module HttpHandlers =
 
 let webApp (eventStore: IStore<UserId, RequestEvent>) =
     let handleCommand (user: User) (command: Command) =
-        let userId = command.UserId
-
-        let eventStream = eventStore.GetStream(userId)
+        let eventStream = eventStore.GetStream(command.UserId)
         let state = eventStream.ReadAll() |> Seq.fold Logic.evolveUserRequests Map.empty
 
         // Decide how to handle the command
@@ -77,16 +90,21 @@ let webApp (eventStore: IStore<UserId, RequestEvent>) =
     choose [
         subRoute "/api"
             (choose [
-                route "/users/login" >=> POST >=> Auth.Handlers.login
+                routex "/users/login/?" >=> POST >=> Auth.Handlers.login
                 subRoute "/timeoff"
                     (Auth.Handlers.requiresJwtTokenForAPI (fun user ->
                         choose [
-                            POST >=> route "/request" >=> HttpHandlers.requestTimeOff (handleCommand user)
-                            POST >=> route "/validate-request" >=> HttpHandlers.validateRequest (handleCommand user)
+                            POST >=>
+                                (choose [                        
+                                    routex "/request/?" >=> HttpHandlers.requestTimeOff (handleCommand user)
+                                    routex "/validate-request/?" >=> HttpHandlers.validateRequest (handleCommand user)
+                                ])
+                            GET >=> routef "/user-balance/%s" (HttpHandlers.getUserBalance user)
                         ]
                     ))
+                RequestErrors.BAD_REQUEST "Bad request"
             ])
-        setStatusCode 404 >=> text "Not Found" ]
+        RequestErrors.NOT_FOUND "Not found" ]
 
 // ---------------------------------
 // Error handler
@@ -110,19 +128,21 @@ let configureApp (eventStore: IStore<UserId, RequestEvent>) (app: IApplicationBu
     let webApp = webApp eventStore
     let env = app.ApplicationServices.GetService<IHostingEnvironment>()
     (match env.IsDevelopment() with
-    | true -> app.UseDeveloperExceptionPage()
-    | false -> app.UseGiraffeErrorHandler errorHandler)
-        .UseCors(configureCors)
-        .UseStaticFiles()
-        .UseGiraffe(webApp)
+     | true -> app.UseDeveloperExceptionPage()
+     | false -> app.UseGiraffeErrorHandler errorHandler
+    ).UseCors(configureCors)
+     .UseStaticFiles()
+     .UseGiraffe(webApp)
 
 let configureServices (services: IServiceCollection) =
     services.AddCors() |> ignore
     services.AddGiraffe() |> ignore
+    services.AddSingleton<IJsonSerializer>(ThothSerializer()) |> ignore
 
-let configureLogging (builder: ILoggingBuilder) =
-    let filter (l: LogLevel) = l.Equals LogLevel.Error
-    builder.AddFilter(filter).AddConsole().AddDebug() |> ignore
+let configureLogging (builder: ILoggingBuilder) = builder.AddFilter(fun (l: LogLevel) -> l.Equals LogLevel.Error)
+                                                         .AddConsole()
+                                                         .AddDebug()
+                                                         |> ignore
 
 [<EntryPoint>]
 let main _ =
@@ -130,7 +150,7 @@ let main _ =
 
     //let eventStore = InMemoryStore.Create<UserId, RequestEvent>()
     let storagePath = System.IO.Path.Combine(contentRoot, "../../../.storage", "userRequests")
-    let eventStore = FileSystemStore.Create<UserId, RequestEvent>(storagePath, sprintf "%d")
+    let eventStore = FileSystemStore.Create<UserId, RequestEvent>(storagePath, id)
 
     let webRoot = Path.Combine(contentRoot, "WebRoot")
     WebHostBuilder()
