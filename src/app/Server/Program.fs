@@ -36,8 +36,7 @@ module HttpHandlers =
                 let result = handleCommand command
                 match result with
                 | Ok _ -> return! json timeOffRequest next ctx
-                | Error message ->
-                    return! (BAD_REQUEST message) next ctx
+                | Error message -> return! (BAD_REQUEST message) next ctx
             }
 
     let validateRequest (handleCommand: Command -> Result<RequestEvent list, string>) =
