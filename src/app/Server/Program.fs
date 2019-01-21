@@ -50,8 +50,7 @@ module HttpHandlers =
                 match result with
                 | Ok [RequestValidated timeOffRequest] -> return! json timeOffRequest next ctx
                 | Ok _ -> return! Successful.NO_CONTENT next ctx
-                | Error message ->
-                    return! (BAD_REQUEST message) next ctx
+                | Error message -> return! (BAD_REQUEST message) next ctx
             }
 
     let getUserBalance (authentifiedUser: User) (userName: string) =
