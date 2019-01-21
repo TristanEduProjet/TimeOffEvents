@@ -59,11 +59,15 @@ module Logic =
                               //TODO: requestCancelled ...
         userRequests.Add (event.Request.RequestId, newRequestState)
 
-    let overlapsWith request1 request2 =
-        false //TODO: write a function that checks if 2 requests overlap
+    let rec overlapsWith (request1:TimeOffRequest) (request2:TimeOffRequest) = //requests mustbe valide (.start <= .end)
+        //if request1 > request2 then overlapsWith request2 request1
+        if (request1.End <= request2.Start && request1.End <= request2.End && request1.End.HalfDay <> request2.Start.HalfDay) then false
+        elif (request2.End <= request1.Start && request2.End <= request1.End && request1.End.HalfDay <> request2.Start.HalfDay) then false
+        else true
 
     let overlapsWithAnyRequest (otherRequests: TimeOffRequest seq) request =
-        false //TODO: write this function using overlapsWith
+        //Seq.sortBy (req -> req.Start) otherRequests |> Seq.pairwise |>
+        Seq.exists (overlapsWith request) otherRequests
 
     let createRequest today activeUserRequests request =
         if request |> overlapsWithAnyRequest activeUserRequests then

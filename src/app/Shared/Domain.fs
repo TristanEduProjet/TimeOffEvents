@@ -11,7 +11,7 @@ type User =
 
 type HalfDay = | AM | PM
 
-[<CLIMutable>]
+[<CLIMutable;StructuralEquality;StructuralComparison>]
 type Boundary = {
     Date: DateTime
     HalfDay: HalfDay

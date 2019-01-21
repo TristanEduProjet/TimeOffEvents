@@ -20,6 +20,44 @@ let Then expected message (events: RequestEvent list, user: User, today: DateTim
     Expect.equal result expected message
 
 open System
+open TimeOff
+
+[<Tests>]
+let BoundaryTests = 
+  testList "Boundary tests" [ //thank auto-compare !
+    test "A Boundary equals itself" {
+      let request:Boundary = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+
+      Expect.isTrue (request = request) "A boundary should equals with istself"
+    }
+
+    test "A Boundary equals identic instance" {
+      let request1:Boundary = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+      let request2:Boundary = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+
+      Expect.isTrue (request1 = request2) "A boundary should equals another instance"
+    }
+
+    test "A Boundary less another" {
+      let request1:Boundary = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+      let request2:Boundary = { Date = DateTime(2018, 10, 1); HalfDay = PM }
+      let request3:Boundary = { Date = DateTime(2018, 10, 2); HalfDay = AM }
+
+      Expect.isTrue (request1 < request2) "A boundary should be less halfday"
+      Expect.isTrue (request1 < request3) "A boundary should be less next halfday"
+      Expect.isTrue (request2 < request3) "A boundary should be less next day"
+    }
+
+    test "A Boundary greater another" {
+      let request1:Boundary = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+      let request2:Boundary = { Date = DateTime(2018, 10, 1); HalfDay = PM }
+      let request3:Boundary = { Date = DateTime(2018, 10, 2); HalfDay = AM }
+
+      Expect.isTrue (request2 > request1) "A boundary should be greater halfday"
+      Expect.isTrue (request3 > request1) "A boundary should be greater next day"
+      Expect.isTrue (request3 > request2) "A boundary should be greater next halfday"
+    }
+  ]
 
 [<Tests>]
 let overlapTests = 
@@ -33,6 +71,44 @@ let overlapTests =
       }
 
       Expect.isTrue (Logic.overlapsWith request request) "A request should overlap with istself"
+    }
+
+    test "A request overlaps with another" {
+      let request1 = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+        End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
+      }
+
+      let request2 = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 10, 2); HalfDay = AM }
+        End = { Date = DateTime(2018, 10, 3); HalfDay = PM }
+      }
+
+      Expect.isTrue (Logic.overlapsWith request1 request2) "A request should overlap with bigger"
+      Expect.isTrue (Logic.overlapsWith request2 request1) "A request should overlap with smaller"
+    }
+
+    test "A request overlaps partialy with another" {
+      let request1 = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+        End = { Date = DateTime(2018, 10, 3); HalfDay = AM }
+      }
+
+      let request2 = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 10, 2); HalfDay = AM }
+        End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
+      }
+
+      Expect.isTrue (Logic.overlapsWith request1 request2) "A request should start after another"
+      Expect.isTrue (Logic.overlapsWith request2 request1) "A request should end before another"
     }
 
     test "Requests on 2 distinct days don't overlap" {
@@ -51,6 +127,180 @@ let overlapTests =
       }
 
       Expect.isFalse (Logic.overlapsWith request1 request2) "The requests don't overlap"
+      Expect.isFalse (Logic.overlapsWith request2 request1) "The requests don't overlap (inverse)" //double check
+    }
+
+    test "Requests on same day without overlap" {
+      let request1 = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+        End = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+      }
+
+      let request2 = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 10, 1); HalfDay = PM }
+        End = { Date = DateTime(2018, 10, 1); HalfDay = PM }
+      }
+
+      Expect.isFalse (Logic.overlapsWith request1 request2) "The requests don't overlap"
+      Expect.isFalse (Logic.overlapsWith request2 request1) "The requests don't overlap (inverse)" //double check
+    }
+
+    test "Requests on same day without overlap (extend test)" {
+      let request1 = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+        End = { Date = DateTime(2018, 10, 2); HalfDay = AM }
+      }
+
+      let request2 = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 10, 2); HalfDay = PM }
+        End = { Date = DateTime(2018, 10, 3); HalfDay = PM }
+      }
+
+      Expect.isFalse (Logic.overlapsWith request1 request2) "The requests don't overlap"
+    }
+  ]
+
+[<Tests>]
+let overlapSeqTests = 
+  testList "Overlap seq tests" [
+    test "Request overlaps when superpose _1" {
+      let requests: TimeOffRequest seq = seq[
+        {
+          UserId = 1
+          RequestId = Guid.NewGuid()
+          Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+          End = { Date = DateTime(2018, 10, 2); HalfDay = PM }
+        };
+        {
+          UserId = 1
+          RequestId = Guid.NewGuid()
+          Start = { Date = DateTime(2018, 10, 3); HalfDay = AM }
+          End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
+        }
+      ]
+      let request: TimeOffRequest = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 10, 4); HalfDay = AM }
+        End = { Date = DateTime(2018, 10, 5); HalfDay = PM }
+      }
+
+      Expect.isTrue (Logic.overlapsWithAnyRequest requests request) "A request should overlap"
+    }
+
+    test "Request overlaps when superpose _2" {
+      let requests: TimeOffRequest seq = seq[
+        {
+          UserId = 1
+          RequestId = Guid.NewGuid()
+          Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+          End = { Date = DateTime(2018, 10, 2); HalfDay = PM }
+        };
+        {
+          UserId = 1
+          RequestId = Guid.NewGuid()
+          Start = { Date = DateTime(2018, 10, 3); HalfDay = AM }
+          End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
+        }
+      ]
+      let request: TimeOffRequest = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 9, 30); HalfDay = AM }
+        End = { Date = DateTime(2018, 10, 5); HalfDay = PM }
+      }
+
+      Expect.isTrue (Logic.overlapsWithAnyRequest requests request) "A request should overlap"
+    }
+    
+    test "Request overlaps when superpose _3" {
+      let requests: TimeOffRequest seq = seq[
+        {
+          UserId = 1
+          RequestId = Guid.NewGuid()
+          Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+          End = { Date = DateTime(2018, 10, 2); HalfDay = PM }
+        };
+        {
+          UserId = 1
+          RequestId = Guid.NewGuid()
+          Start = { Date = DateTime(2018, 10, 3); HalfDay = AM }
+          End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
+        }
+      ]
+      let request: TimeOffRequest = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 9, 30); HalfDay = AM }
+        End = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+      }
+
+      Expect.isTrue (Logic.overlapsWithAnyRequest requests request) "A request should overlap with istself"
+    }
+
+    test "Request don't overlaps" {
+      let requests: TimeOffRequest seq = seq[
+        {
+          UserId = 1
+          RequestId = Guid.NewGuid()
+          Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+          End = { Date = DateTime(2018, 10, 2); HalfDay = PM }
+        };
+        {
+          UserId = 1
+          RequestId = Guid.NewGuid()
+          Start = { Date = DateTime(2018, 10, 3); HalfDay = AM }
+          End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
+        }
+      ]
+      let request1: TimeOffRequest = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 10, 5); HalfDay = AM }
+        End = { Date = DateTime(2018, 10, 5); HalfDay = PM }
+      }
+      let request2: TimeOffRequest = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 9, 30); HalfDay = AM }
+        End = { Date = DateTime(2018, 9, 30); HalfDay = PM }
+      }
+
+      Expect.isFalse (Logic.overlapsWithAnyRequest requests request1) "A request should not overlap"
+      Expect.isFalse (Logic.overlapsWithAnyRequest requests request2) "A request should not overlap"
+    }
+
+    test "Request don't overlaps between" {
+      let requests: TimeOffRequest seq = seq[
+        {
+          UserId = 1
+          RequestId = Guid.NewGuid()
+          Start = { Date = DateTime(2018, 10, 1); HalfDay = AM }
+          End = { Date = DateTime(2018, 10, 2); HalfDay = AM }
+        };
+        {
+          UserId = 1
+          RequestId = Guid.NewGuid()
+          Start = { Date = DateTime(2018, 10, 3); HalfDay = AM }
+          End = { Date = DateTime(2018, 10, 4); HalfDay = PM }
+        }
+      ]
+      let request: TimeOffRequest = {
+        UserId = 1
+        RequestId = Guid.NewGuid()
+        Start = { Date = DateTime(2018, 10, 2); HalfDay = PM }
+        End = { Date = DateTime(2018, 10, 2); HalfDay = PM }
+      }
+
+      Expect.isFalse (Logic.overlapsWithAnyRequest requests request) "A request should not overlap"
     }
   ]
 
