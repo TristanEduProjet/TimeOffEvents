@@ -8,7 +8,7 @@ type Command =
     | ValidateRequest of UserId * Guid
     | CancelRequest of UserId * Guid
     with
-    member this.UserId =
+    member this.UserId : UserId =
         match this with
         | RequestTimeOff request -> request.UserId
         | ValidateRequest (userId, _) -> userId
@@ -20,7 +20,7 @@ type RequestEvent =
     | RequestValidated of TimeOffRequest
     | RequestCancelled of TimeOffRequest
     with
-    member this.Request =
+    member this.Request : TimeOffRequest =
         match this with
         | RequestCreated request -> request
         | RequestValidated request -> request
