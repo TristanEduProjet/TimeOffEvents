@@ -18,11 +18,9 @@ let authUser (login: Login) =
 
       let body = Encode.Auto.toString(2, login)
 
-      let props = 
-          [ RequestProperties.Method HttpMethod.POST
-            Fetch.requestHeaders [
-              HttpRequestHeaders.ContentType "application/json" ]
-            RequestProperties.Body !^body ]
+      let props = [ RequestProperties.Method HttpMethod.POST
+                    Fetch.requestHeaders [ HttpRequestHeaders.ContentType "application/json" ]
+                    RequestProperties.Body !^body ]
       
       try
           let! response = Fetch.fetch ServerUrls.Login props
@@ -40,27 +38,20 @@ let authUser (login: Login) =
 
 let init (user: UserData option) = 
     match user with
-    | None ->
-        { Login = { UserName = ""; Password = ""; PasswordId = Guid.NewGuid() }
-          State = LoggedOut
-          ErrorMsg = "" }, Cmd.none
-    | Some user ->
-        { Login = { UserName = user.UserName; Password = ""; PasswordId = Guid.NewGuid() }
-          State = LoggedIn user
-          ErrorMsg = "" }, Cmd.none
+    | None -> { Login = { UserName = ""; Password = ""; PasswordId = Guid.NewGuid() }
+                State = LoggedOut
+                ErrorMsg = "" }, Cmd.none
+    | Some user -> { Login = { UserName = user.UserName; Password = ""; PasswordId = Guid.NewGuid() }
+                     State = LoggedIn user
+                     ErrorMsg = "" }, Cmd.none
 
-let authUserCmd login = 
-  Cmd.ofPromise authUser login AuthSuccess AuthError
+let authUserCmd login = Cmd.ofPromise authUser login AuthSuccess AuthError
 
 let update onInternal onSuccess (msg:Msg) model : Model*Cmd<_> = 
     match msg with
     | AuthSuccess userData ->
         { model with State = LoggedIn userData;  Login = { model.Login with Password = ""; PasswordId = Guid.NewGuid()  } }, onSuccess userData
-    | SetUserName name ->
-        { model with Login = { model.Login with UserName = name; Password = ""; PasswordId = Guid.NewGuid() } }, Cmd.none
-    | SetPassword pw ->
-        { model with Login = { model.Login with Password = pw }}, Cmd.none
-    | ClickLogIn ->
-        model, authUserCmd model.Login |> Cmd.map onInternal
-    | AuthError exn ->
-        { model with ErrorMsg = string (exn.Message) }, Cmd.none
+    | SetUserName name -> { model with Login = { model.Login with UserName = name; Password = ""; PasswordId = Guid.NewGuid() } }, Cmd.none
+    | SetPassword pw -> { model with Login = { model.Login with Password = pw }}, Cmd.none
+    | ClickLogIn -> model, authUserCmd model.Login |> Cmd.map onInternal
+    | AuthError exn -> { model with ErrorMsg = string (exn.Message) }, Cmd.none

@@ -73,9 +73,7 @@ module HttpHandlers =
 
 let webApp (eventStore: IStore<UserId, RequestEvent>) =
     let handleCommand (user: User) (command: Command) =
-        let userId = command.UserId
-
-        let eventStream = eventStore.GetStream(userId)
+        let eventStream = eventStore.GetStream(command.UserId)
         let state = eventStream.ReadAll() |> Seq.fold Logic.evolveUserRequests Map.empty
 
         // Decide how to handle the command
@@ -92,7 +90,7 @@ let webApp (eventStore: IStore<UserId, RequestEvent>) =
     choose [
         subRoute "/api"
             (choose [
-                route "/users/login/" >=> POST >=> Auth.Handlers.login
+                routex "/users/login/?" >=> POST >=> Auth.Handlers.login
                 subRoute "/timeoff"
                     (Auth.Handlers.requiresJwtTokenForAPI (fun user ->
                         choose [
@@ -104,6 +102,7 @@ let webApp (eventStore: IStore<UserId, RequestEvent>) =
                             GET >=> routef "/user-balance/%s" (HttpHandlers.getUserBalance user)
                         ]
                     ))
+                RequestErrors.BAD_REQUEST "Bad request"
             ])
         RequestErrors.NOT_FOUND "Not found" ]
 
@@ -129,20 +128,21 @@ let configureApp (eventStore: IStore<UserId, RequestEvent>) (app: IApplicationBu
     let webApp = webApp eventStore
     let env = app.ApplicationServices.GetService<IHostingEnvironment>()
     (match env.IsDevelopment() with
-    | true -> app.UseDeveloperExceptionPage()
-    | false -> app.UseGiraffeErrorHandler errorHandler)
-        .UseCors(configureCors)
-        .UseStaticFiles()
-        .UseGiraffe(webApp)
+     | true -> app.UseDeveloperExceptionPage()
+     | false -> app.UseGiraffeErrorHandler errorHandler
+    ).UseCors(configureCors)
+     .UseStaticFiles()
+     .UseGiraffe(webApp)
 
 let configureServices (services: IServiceCollection) =
     services.AddCors() |> ignore
     services.AddGiraffe() |> ignore
     services.AddSingleton<IJsonSerializer>(ThothSerializer()) |> ignore
 
-let configureLogging (builder: ILoggingBuilder) =
-    let filter (l: LogLevel) = l.Equals LogLevel.Error
-    builder.AddFilter(filter).AddConsole().AddDebug() |> ignore
+let configureLogging (builder: ILoggingBuilder) = builder.AddFilter(fun (l: LogLevel) -> l.Equals LogLevel.Error)
+                                                         .AddConsole()
+                                                         .AddDebug()
+                                                         |> ignore
 
 [<EntryPoint>]
 let main _ =

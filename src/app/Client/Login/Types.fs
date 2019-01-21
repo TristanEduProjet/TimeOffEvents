@@ -12,8 +12,8 @@ type Model = {
     ErrorMsg : string }
 
 type Msg =
-  | SetUserName of string
-  | SetPassword of string
-  | AuthSuccess of UserData
-  | AuthError of exn
-  | ClickLogIn
+    | SetUserName of string
+    | SetPassword of string
+    | AuthSuccess of UserData
+    | AuthError of exn
+    | ClickLogIn
