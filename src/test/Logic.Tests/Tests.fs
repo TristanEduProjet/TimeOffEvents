@@ -2,7 +2,6 @@ module TimeOff.Tests
 
 open Expecto
 open System
-open System
 
 let Given (events: RequestEvent list) = events
 let ConnectedAs (user: User) (events: RequestEvent list) = events, user
@@ -333,8 +332,8 @@ let creationTests =
       |> When (RequestTimeOff request)
       |> Then (Error "The request starts in the past") "The request should not have been created"
     }
-    //validé reqête qui n'existe pas
-    //validé requête en n'étant pas manager
+    //TODO: validé reqête qui n'existe pas
+    //TODO: validé requête en n'étant pas manager
   ]
 
 [<Tests>]
