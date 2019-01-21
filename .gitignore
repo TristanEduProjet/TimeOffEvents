@@ -1,4 +1,6 @@
 output.html
+npm-debug.log
+public/bundle/
 
 # Created with https://www.gitignore.io/api/osx,git,rider,linux,fsharp,csharp,windows,visualstudio,jetbrains+all,visualstudiocode
 
