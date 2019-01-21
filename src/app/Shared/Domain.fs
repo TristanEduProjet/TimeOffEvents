@@ -3,19 +3,19 @@
 open System
 
 // First, we define our domain
+type UserId = string
+
 type User =
-    | Employee of int
+    | Employee of UserId
     | Manager
 
 type HalfDay = | AM | PM
 
-[<CLIMutable>]
+[<CLIMutable;StructuralEquality;StructuralComparison>]
 type Boundary = {
     Date: DateTime
     HalfDay: HalfDay
 }
-
-type UserId = int
 
 [<CLIMutable>]
 type TimeOffRequest = {
@@ -23,4 +23,14 @@ type TimeOffRequest = {
     RequestId: Guid
     Start: Boundary
     End: Boundary
+}
+
+[<CLIMutable>]
+type UserVacationBalance = {
+  UserName : UserId
+  BalanceYear: int
+  CarriedOver: float
+  PortionAccruedToDate: float
+  TakenToDate: float
+  CurrentBalance: float
 }

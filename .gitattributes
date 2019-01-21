@@ -1,17 +1,458 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
-# Custom for Visual Studio
-*.cs     diff=csharp
+# Ignore all test and documentation with “export-ignore”.
+.gitattributes   export-ignore
+.gitignore       export-ignore
+README.md        export-ignore
+phpunit.xml.dist export-ignore
+/docs            export-ignore
+/tests           export-ignore
 
-# Standard to msysgit
-*.doc	 diff=astextplain
-*.DOC	 diff=astextplain
+# Some developers uses these, I prefer -diff for mistakes prevention
+#yarn.lock              merge=ours
+#package-lock.json      merge=ours
+composer.lock          -diff
+yarn.lock              -diff
+public/build/js/*      linguist-vendored
+public/build/js/*.js   -diff
+public/build/css/*.css -diff linguist-vendored
+public/build/font/*    linguist-vendored
+*.map                  -diff
+rev-manifest.json      -diff
+
+# Custom for Visual Studio
+*.cs text diff=csharp
+*.fs text
+*.dependencies diff=astextplain
+*.targets diff=xml
+packet.lock diff=astextplain
+
+# Define a dummy ours merge strategy with (for Ruby On Rails project):
+# $ git config --global merge.ours.driver true
+schema.rb merge=ours
+
+# Documents (Standard to msysgit)
+*.doc  diff=astextplain
+*.DOC  diff=astextplain
 *.docx diff=astextplain
 *.DOCX diff=astextplain
 *.dot  diff=astextplain
-*.DOT  diff=astextplain
+#*.DOT  diff=astextplain
+#*.odt  ?
+#*.ods  ?
 *.pdf  diff=astextplain
-*.PDF	 diff=astextplain
-*.rtf	 diff=astextplain
-*.RTF	 diff=astextplain
+*.PDF  diff=astextplain
+*.rtf  diff=astextplain
+*.RTF  diff=astextplain
+*.xls  diff=astextplain
+*.xslx diff=astextplain
+
+#... text eol=lf whitespace=blank-at-eol,-blank-at-eof,-space-before-tab,tab-in-indent,tabwidth=2
+
+## Source code
+# Caution: *.m also matches Mathematica packages.
+*.adb        text diff=ada
+*.bal        text
+*.bat        text eol=crlf
+*.bib        text diff=bibtex
+*-blx.bib    linguist-vendored
+*.bst        text
+*.coffee     text
+*.c          text diff=cpp
+*.cc         text diff=cpp
+*.c++        text diff=cpp
+*.cfg        text
+*.cls        text
+*.clo        text
+*.cpp        text diff=cpp
+*.css        text diff=css
+*.csv        text
+*.cxx        text diff=cpp
+*.dbi        -text
+*.def        text
+*.dtd        text
+*.df         text
+*.dfm        text
+*.dof        text
+*.engine     text
+*.f          text diff=fortan
+*.f90        text diff=fortan
+*.fountain   text diff=fountain
+*.frm        -text
+*.go         text diff=golang
+*.h          text diff=cpp
+*.h++        text diff=cpp
+*.hh         text diff=cpp
+*.hpp        text diff=cpp
+*.htm        text diff=html
+*.html       text diff=html
+*.inc        text
+*.ini        text
+*.ist        text
+*.java       text diff=java
+*.js         text
+*.json       text
+*.jsp        text
+*.jspf       text
+*.jspx       text
+*.jsx        text
+*.less       text
+*.lua        text
+*.lpr        text
+*.lfm        text
+*.lrs        text linguist-vendored
+*.m          text diff=objc
+*.M          text diff=objc
+#*.m          text diff=matlab
+*.mm         text diff=objc
+*.mu         text diff=matlab
+*.module     text
+*.od         text
+*.onlydata   text
+*.pas        text diff=pascal
+*.php        text diff=php
+*.pl         text diff=perl
+*.pm         text diff=perl
+*.po         text
+*.pp         text diff=pascal
+*.properties text
+*.ps         -diff
+*.pxd        text diff=python
+*.py         text diff=python
+*.py3        text diff=python
+*.pyw        text diff=python
+*.pyx        text diff=python
+*.rb         text diff=ruby
+*.rc         text
+*.rel        -text
+*.Rdata      text
+*.rdb        binary
+*.rds        binary
+*.Rd         text
+*.Rdx        binary
+*.Rmd        text
+*.R          text
+*.sass       text
+*.scm        text
+*.scss       text
+*.sec        -text
+*.sh         text eol=lf
+*.shtml      text diff=html
+*.spmd       text diff=fountain
+*.sql        text
+*.sty        text
+*.styl       text
+*.tab        text
+*.tag        text
+*.tagx       text
+*.tbl        -text
+*.test       text
+*.tex        text diff=tex
+*.theme      text
+*.tld        text
+*.ts         text
+*.tsv        text
+*.tsx        text
+*.val        -text
+*.vue        text
+*.xml        text
+*.xhtml      text diff=html
+*.xsd        text
+*.xsl        text
+*.yaml       text
+*.yml        text
+
+#Logs
+*.log text linguist-vendored
+*.ilg text -diff linguist-vendored
+*.glg text -diff linguist-vendored
+*.blg text -diff linguist-vendored
+
+
+## CI
+*.dockerignore text
+Dockerfile     text
+Procfile       text
+.slugignore    text
+
+## Documentation
+*.adoc       text
+#*.dvi
+*.fdr        text
+*.fdx        text
+*.ipynb      text
+*.markdown   text
+*.md         text
+*.mdwn       text
+*.mdown      text
+*.mkd        text
+*.mkdn       text
+*.mdtxt      text
+*.mdtext     text
+*.textile    text
+*.txt        text
+AUTHORS      text
+CHANGELOG    text
+CHANGES      text
+CONTRIBUTING text
+COPYING      text
+copyright    text
+*COPYRIGHT*  text
+INSTALL      text
+license      text
+LICENSE      text
+NEWS         text
+readme       text
+*README*     text
+TODO         text
+
+## Templates
+*.dot        text
+*.ejs        text
+*.haml       text
+*.handlebars text
+*.hbs        text
+*.hbt        text
+*.jade       text
+*.latte      text
+*.mustache   text
+*.njk        text
+*.phtml      text
+*.tmpl       text
+*.tpl        text
+*.twig       text
+
+## Configs
+*.bowerrc       text
+*.cnf           text
+*.conf          text
+*.config        text
+.babelrc        text
+.browserslistrc text
+.editorconfig   text
+.env            text
+.gitattributes  text
+.gitconfig      text
+.gitignore      text
+.htaccess       text
+*.lock          text
+*.npmignore     text
+browserslist    text
+Makefile        text
+makefile        text
+.csslintrc      text
+.eslintrc       text
+.htmlhintrc     text
+.jscsrc         text
+.jshintrc       text
+.jshintignore   text
+.stylelintrc    text
+
+## Graphics
+*.ai   binary
+*.bmp  binary
+*.eps  binary
+*.gif  binary
+*.ico  binary
+*.jng  binary
+*.jp2  binary
+*.jpg  binary
+*.jpeg binary
+*.jpx  binary
+*.jxr  binary
+*.pbm  text
+*.pdf  binary
+*.pgm  text
+*.png  binary diff=exif
+*.ppm  text
+*.psb  binary
+*.psd  binary
+*.svg  text
+*.svgz binary
+*.tif  binary
+*.tiff binary
+*.wbmp binary
+*.webp binary
+*.xpm  text
+
+## Audio
+*.kar  binary
+*.m4a  binary
+*.mid  binary
+*.midi binary
+*.mp3  binary
+*.ogg  binary
+*.ra   binary
+
+## Video
+*.3gpp binary
+*.3gp  binary
+*.as   binary
+*.asf  binary
+*.asx  binary
+*.fla  binary
+*.flv  binary
+*.m4v  binary
+*.mng  binary
+*.mov  binary
+*.mp4  binary
+*.mpeg binary
+*.mpg  binary
+*.ogv  binary
+*.swc  binary
+*.swf  binary
+*.webm binary
+
+# handle swf's and swc's as binaries
+## stackoverflow.com/questions/1529178/git-flash-builder-workflow-how-do-i-set-it-up-so-git-works-smoothly
+*.swf -crlf -diff -merge
+*.swc -crlf -diff -merge
+*.fla -crlf -diff -merge
+
+## Database
+*.dbf binary
+*.mdx binary
+
+## Archives
+*.7z  binary
+*.deb binary
+*.ear binary
+*.gz  binary
+*.jar binary
+*.rar binary
+*.rpm binary
+*.tar binary
+*.war binary
+*.win binary
+*.xz  binary
+*.zip binary
+
+## Fonts
+*.fd    text
+*.eot   binary
+*.otf   binary
+*.ttf   binary
+*.woff  binary
+*.woff2 binary
+
+# Compiled Object files
+*.ali text
+*.lo  binary
+*.ppu binary
+*.pyd binary
+*.pyo binary
+*.o   binary
+*.obj binary
+#*.obj -text
+*.or  binary
+*.slo binary
+
+# Precompiled Headers
+*.gch binary
+*.pch binary
+
+# Compiled Dynamic libraries
+*.dll   binary
+*.dylib binary
+*.so    binary
+
+# Compiled Static libraries
+*.a   binary
+*.la  binary
+*.lai binary
+*.lib binary
+
+## Executables
+# (binary is a macro for -text -diff)
+*.app   binary
+*.class binary
+*.exe   binary
+*.out   binary
+*.pyc   binary
+
+## Other (TODO)
+*.balx          binary
+*.dmg           binary
+*.phar          binary
+*.pbxproj       binary -merge=union
+*.p             binary
+*.mex*          binary
+*.fig           binary
+*.mat           binary
+*.mdl           binary
+*.slx           binary
+*.mdlp          binary
+*.slxp          binary
+*.sldd          binary
+*.mltbx         binary
+*.mlappinstall  binary
+*.mlpkginstall  binary
+*.mn            binary
+*.db            binary
+*.pkl           binary
+*.lzi           text diff=xml
+*.lpk           text diff=xml
+#*.res           text
+*.rsj           text
+#*.hlp           ?
+#*.chm           ?
+*.aux           linguist-vendored
+*.toc           linguist-vendored
+*.lot           linguist-vendored
+*.lof           linguist-vendored
+*.idx           text linguist-vendored
+#*.bbl          linguist-vendored
+#*.ind          linguist-vendored
+#*.gls          linguist-vendored
+*.glo           text linguist-vendored
+*.bcf           linguist-vendored
+
+
+###############################################################################
+# Set the merge driver for project and solution files
+#
+# Merging from the command prompt will add diff markers to the files if there
+# are conflicts (Merging from VS is not affected by the settings below, in VS
+# the diff markers are never inserted). Diff markers may cause the following
+# file extensions to fail to load in VS. An alternative would be to treat
+# these files as binary and thus will always conflict and require user
+# intervention with every merge. To do so, just comment the entries below and
+# uncomment the group further below
+###############################################################################
+
+*.sln        text eol=crlf
+*.csproj     text eol=crlf
+*.vbproj     text eol=crlf
+*.vcxproj    text eol=crlf
+*.vcproj     text eol=crlf
+*.dbproj     text eol=crlf
+*.fsproj     text eol=crlf
+*.lsproj     text eol=crlf
+*.wixproj    text eol=crlf
+*.modelproj  text eol=crlf
+*.sqlproj    text eol=crlf
+*.wmaproj    text eol=crlf
+
+*.xproj      text eol=crlf
+*.props      text eol=crlf
+*.filters    text eol=crlf
+*.vcxitems   text eol=crlf
+
+*.sln       merge=binary
+*.csproj    merge=binary
+*.vbproj    merge=binary
+*.vcxproj   merge=binary
+*.vcproj    merge=binary
+*.dbproj    merge=binary
+*.fsproj    merge=binary
+*.lsproj    merge=binary
+*.wixproj   merge=binary
+*.modelproj merge=binary
+*.sqlproj   merge=binary
+*.wwaproj   merge=binary
+
+*.xproj     merge=binary
+*.props     merge=binary
+*.filters   merge=binary
+*.vcxitems  merge=binary
